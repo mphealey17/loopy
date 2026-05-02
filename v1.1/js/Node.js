@@ -214,16 +214,60 @@ function Node(model, config){
 			ctx.fill();
 		}
 		
-		// Layer accent ring — drawn outside the node circle when a layer is assigned
+		// Layer decoration — explicit visual cue when a layer is assigned.
+		// Stacks three signals so it's unmistakable:
+		//   1. soft outer halo (translucent)
+		//   2. crisp accent ring (bold)
+		//   3. labelled chip above the node with the layer name
 		if(self.layer!==null && self.layer!==undefined){
 			var layerColor = Node.LAYER_COLORS[self.layer];
+			var layerName  = Node.LAYER_NAMES[self.layer];
+
+			// Soft outer halo
+			ctx.beginPath();
+			ctx.arc(0, 0, r+18, 0, Math.TAU, false);
+			ctx.lineWidth = 14;
+			ctx.strokeStyle = layerColor;
+			ctx.globalAlpha = 0.22;
+			ctx.stroke();
+
+			// Crisp accent ring
 			ctx.beginPath();
 			ctx.arc(0, 0, r+10, 0, Math.TAU, false);
-			ctx.lineWidth = 4;
+			ctx.lineWidth = 8;
 			ctx.strokeStyle = layerColor;
-			ctx.globalAlpha = 0.9;
-			ctx.stroke();
 			ctx.globalAlpha = 1;
+			ctx.stroke();
+
+			// Layer chip above the node
+			ctx.font = "600 28px sans-serif";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			var nameWidth = ctx.measureText(layerName).width;
+			var chipPadX = 22;
+			var chipW = nameWidth + chipPadX*2;
+			var chipH = 40;
+			var chipY = -r - 38;
+			var chipR = 14;
+
+			// Chip background (filled rounded rect)
+			ctx.beginPath();
+			if(ctx.roundRect){
+				ctx.roundRect(-chipW/2, chipY - chipH/2, chipW, chipH, chipR);
+			} else {
+				ctx.rect(-chipW/2, chipY - chipH/2, chipW, chipH);
+			}
+			ctx.fillStyle = layerColor;
+			ctx.fill();
+
+			// Chip border (slight darken for readability on light layers)
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = "rgba(14,74,85,0.25)";
+			ctx.stroke();
+
+			// Chip text — pick light or dark based on the layer color
+			ctx.fillStyle = (self.layer===0 || self.layer===1) ? "#0E4A55" : "#fff";
+			ctx.fillText(layerName, 0, chipY);
 		}
 
 		// White-gray bubble with colored border
