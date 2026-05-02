@@ -1,6 +1,6 @@
 /**********************************
 
-SIDEBAR CODE
+SIDEBAR CODE — fathom
 
 **********************************/
 
@@ -37,12 +37,11 @@ function Sidebar(loopy){
 			}
 		}));
 		page.addComponent("label", new ComponentInput({
-			label: "<br><br>Name:"
-			//label: "Name:"
+			label: "<br><br>name:"
 		}));
 		page.addComponent("hue", new ComponentSlider({
 			bg: "color",
-			label: "Color:",
+			label: "colour:",
 			options: [0,1,2,3,4,5],
 			oninput: function(value){
 				Node.defaultHue = value;
@@ -50,19 +49,44 @@ function Sidebar(loopy){
 		}));
 		page.addComponent("init", new ComponentSlider({
 			bg: "initial",
-			label: "Start Amount:",
+			label: "start amount:",
 			options: [0, 0.16, 0.33, 0.50, 0.66, 0.83, 1],
-			//options: [0, 1/6, 2/6, 3/6, 4/6, 5/6, 1],
 			oninput: function(value){
 				Node.defaultValue = value;
 			}
 		}));
+
+		// Iceberg layer picker — fathom's signature.
+		page.addComponent("layer", new ComponentLayerPicker({
+			label: "iceberg layer:",
+			oninput: function(value){
+				Node.defaultLayer = value;
+			}
+		}));
+
+		// In/out degree readout
+		var degreeReadout = new ComponentHTML({ html: "" });
+		page.addComponent(degreeReadout);
+
 		page.onedit = function(){
 
 			// Set color of Slider
 			var node = page.target;
 			var color = Node.COLORS[node.hue];
 			page.getComponent("init").setBGColor(color);
+
+			// Refresh in/out degree
+			var inD = loopy.model.getInDegree(node);
+			var outD = loopy.model.getOutDegree(node);
+			degreeReadout.dom.innerHTML =
+				"<div class='degree_readout'>" +
+				"<div class='degree_label'>connections</div>" +
+				"<div class='degree_pair'>" +
+				"<span class='degree_in'>&rarr; " + inD + " in</span>" +
+				"<span class='degree_out'>" + outD + " out &rarr;</span>" +
+				"</div>" +
+				"<div class='degree_hint'>high out-degree at deeper layers = stronger leverage</div>" +
+				"</div>";
 
 			// Focus on the name field IF IT'S "" or "?"
 			var name = node.label;
@@ -71,7 +95,6 @@ function Sidebar(loopy){
 		};
 		page.addComponent(new ComponentButton({
 			label: "delete node",
-			//label: "delete circle",
 			onclick: function(node){
 				node.kill();
 				self.showPage("Edit");
@@ -92,21 +115,18 @@ function Sidebar(loopy){
 		}));
 		page.addComponent("strength", new ComponentSlider({
 			bg: "strength",
-			label: "<br><br>Relationship:",
-			//label: "Relationship:",
+			label: "<br><br>relationship:",
 			options: [1, -1],
 			oninput: function(value){
 				Edge.defaultStrength = value;
 			}
 		}));
 		page.addComponent(new ComponentHTML({
-			html: "(to make a stronger relationship, draw multiple arrows!)<br><br>"+
-			"(to make a delayed relationship, draw longer arrows)"
+			html: "(stronger relationship: draw multiple arrows)<br><br>" +
+				"(delayed relationship: draw a longer arrow)"
 		}));
 		page.addComponent(new ComponentButton({
-			//label: "delete edge",
 			label: "delete arrow",
-			//label: "delete relationship",
 			onclick: function(edge){
 				edge.kill();
 				self.showPage("Edit");
@@ -126,28 +146,20 @@ function Sidebar(loopy){
 			}
 		}));
 		page.addComponent("text", new ComponentInput({
-			label: "<br><br>Label:",
-			//label: "Label:",
+			label: "<br><br>label:",
 			textarea: true
 		}));
 		page.onshow = function(){
-			// Focus on the text field
 			page.getComponent("text").select();
 		};
 		page.onhide = function(){
-			
-			// If you'd just edited it...
 			var label = page.target;
 			if(!page.target) return;
-
-			// If text is "" or all spaces, DELETE.
 			var text = label.text;
 			if(/^\s*$/.test(text)){
-				// that was all whitespace, KILL.
 				page.target = null;
 				label.kill();
 			}
-
 		};
 		page.addComponent(new ComponentButton({
 			label: "delete label",
@@ -159,49 +171,44 @@ function Sidebar(loopy){
 		self.addPage("Label", page);
 	})();
 
-	// Edit
+	// Edit (landing) — fpc-branded
 	(function(){
 		var page = new SidebarPage();
 		page.addComponent(new ComponentHTML({
 			html: ""+
-			
-			"<b style='font-size:1.4em'>LOOPY</b> (v1.1)<br>a tool for thinking in systems<br><br>"+
 
-			"<span class='mini_button' onclick='publish(\"modal\",[\"examples\"])'>see examples</span> "+
-			"<span class='mini_button' onclick='publish(\"modal\",[\"howto\"])'>how to</span> "+
-			"<span class='mini_button' onclick='publish(\"modal\",[\"credits\"])'>credits</span><br><br>"+
+			"<div class='brand_block'>" +
+			"<div class='brand_word'>fathom</div>" +
+			"<div class='brand_tag'>see the system beneath the symptom</div>" +
+			"</div>" +
 
-			"<hr/><br>"+
+			"<hr/>" +
 
-			"<span class='mini_button' onclick='publish(\"modal\",[\"save_link\"])'>save as link</span> <br><br>"+
-			"<span class='mini_button' onclick='publish(\"export/file\")'>save as file</span> "+
-			"<span class='mini_button' onclick='publish(\"import/file\")'>load from file</span> <br><br>"+
-			"<span class='mini_button' onclick='publish(\"modal\",[\"embed\"])'>embed in your website</span> <br><br>"+
-			"<span class='mini_button' onclick='publish(\"modal\",[\"save_gif\"])'>make a GIF using LICEcap</span> <br><br>"+
+			"<div class='hint_block'>" +
+			"<b>get started</b><br><br>" +
+			"&middot; load an example from the top bar<br>" +
+			"&middot; or start drawing your own system<br><br>" +
+			"<b>tools</b> (left side)<br><br>" +
+			"&middot; <i>pencil</i> &mdash; draw nodes &amp; arrows<br>" +
+			"&middot; <i>text</i> &mdash; add notes to the canvas<br>" +
+			"&middot; <i>move</i> &mdash; reposition nodes<br>" +
+			"&middot; <i>erase</i> &mdash; remove things<br><br>" +
+			"<b>once you've drawn a node</b><br><br>" +
+			"click on it to open this panel and assign it to an iceberg layer.<br><br>" +
+			"</div>" +
 
-			"<hr/><br>"+
-				
-			"<a target='_blank' href='../'>LOOPY</a> is "+
-			"made by <a target='_blank' href='http://ncase.me'>nicky case</a> "+
-			"with your support <a target='_blank' href='https://www.patreon.com/ncase'>on patreon</a> &lt;3<br><br>"+
-			"<span style='font-size:0.85em'>P.S: go read <a target='_blank' href='https://www.amazon.com/Thinking-Systems-Donella-H-Meadows/dp/1603580557'>Thinking In Systems</a>, thx</span>"
+			"<hr/>" +
 
+			"<div class='credits_line'>" +
+			"a tool by <a target='_blank' href='https://fpconsulting.com.au'>first person consulting</a>" +
+			"</div>"
 		}));
 		self.addPage("Edit", page);
 	})();
 
-	// Ctrl-S to SAVE
-	subscribe("key/save",function(){
-		if(Key.control){ // Ctrl-S or ⌘-S
-			publish("modal",["save_link"]);
-		}
-	});
-
 }
 
 function SidebarPage(){
-
-	// TODO: be able to focus on next component with an "Enter".
 
 	var self = this;
 	self.target = null;
@@ -240,26 +247,18 @@ function SidebarPage(){
 
 	// Edit
 	self.edit = function(object){
-
-		// New target to edit!
 		self.target = object;
-
-		// Show each property with its component
 		for(var i=0;i<self.components.length;i++){
 			self.components[i].show();
 		}
-
-		// Callback!
 		self.onedit();
-
 	};
 
-	// TO IMPLEMENT: callbacks
+	// Callbacks
 	self.onedit = function(){};
 	self.onshow = function(){};
 	self.onhide = function(){};
 
-	// Start hiding!
 	self.hide();
 
 }
@@ -275,31 +274,22 @@ function Component(){
 	self.dom = null;
 	self.page = null;
 	self.propName = null;
-	self.show = function(){
-		// TO IMPLEMENT
-	};
+	self.show = function(){};
 	self.getValue = function(){
 		return self.page.target[self.propName];
 	};
 	self.setValue = function(value){
-		
-		// Model's been changed!
 		publish("model/changed");
-
-		// Edit the value!
 		self.page.target[self.propName] = value;
-		self.page.onedit(); // callback!
-		
+		self.page.onedit();
 	};
 }
 
 function ComponentInput(config){
 
-	// Inherit
 	var self = this;
 	Component.apply(self);
 
-	// DOM: label + text input
 	self.dom = document.createElement("div");
 	var label = _createLabel(config.label);
 	var className = config.textarea ? "component_textarea" : "component_input";
@@ -310,12 +300,10 @@ function ComponentInput(config){
 	self.dom.appendChild(label);
 	self.dom.appendChild(input);
 
-	// Show
 	self.show = function(){
 		input.value = self.getValue();
 	};
 
-	// Select
 	self.select = function(){
 		setTimeout(function(){ input.select(); },10);
 	};
@@ -324,13 +312,9 @@ function ComponentInput(config){
 
 function ComponentSlider(config){
 
-	// Inherit
 	var self = this;
 	Component.apply(self);
 
-	// TODO: control with + / -, alt keys??
-
-	// DOM: label + slider
 	self.dom = document.createElement("div");
 	var label = _createLabel(config.label);
 	self.dom.appendChild(label);
@@ -338,7 +322,6 @@ function ComponentSlider(config){
 	sliderDOM.setAttribute("class","component_slider");
 	self.dom.appendChild(sliderDOM);
 
-	// Slider DOM: graphic + pointer
 	var slider = new Image();
 	slider.draggable = false;
 	slider.src = "css/sliders/"+config.bg+".png";
@@ -356,7 +339,6 @@ function ComponentSlider(config){
 		pointer.style.left = (x-7.5)+"px";
 	};
 
-	// On click... (or on drag)
 	var isDragging = false;
 	var onmousedown = function(event){
 		isDragging = true;
@@ -369,51 +351,94 @@ function ComponentSlider(config){
 		if(isDragging) sliderInput(event);
 	};
 	var sliderInput = function(event){
-
-		// What's the option?
 		var index = event.x/250;
 		var optionIndex = Math.floor(index*config.options.length);
 		var option = config.options[optionIndex];
 		if(option===undefined) return;
 		self.setValue(option);
-
-		// Callback! (if any)
 		if(config.oninput){
 			config.oninput(option);
 		}
-
-		// Move pointer there.
 		movePointer();
-
 	};
 	_addMouseEvents(slider, onmousedown, onmousemove, onmouseup);
 
-	// Show
 	self.show = function(){
 		movePointer();
 	};
 
-	// BG Color!
 	self.setBGColor = function(color){
 		slider.style.background = color;
 	};
 
 }
 
-function ComponentButton(config){
+function ComponentLayerPicker(config){
 
-	// Inherit
+	// 4 buttons + an "unassigned" option, mapping to layer 0..3 / null
 	var self = this;
 	Component.apply(self);
 
-	// DOM: just a button
+	self.dom = document.createElement("div");
+	var label = _createLabel(config.label);
+	self.dom.appendChild(label);
+
+	var pickerRow = document.createElement("div");
+	pickerRow.setAttribute("class", "layer_picker");
+	self.dom.appendChild(pickerRow);
+
+	var options = [
+		{ value: null, name: "none",            color: "#cccccc" },
+		{ value: 0,    name: "events",          color: Node.LAYER_COLORS[0] },
+		{ value: 1,    name: "patterns",        color: Node.LAYER_COLORS[1] },
+		{ value: 2,    name: "structures",      color: Node.LAYER_COLORS[2] },
+		{ value: 3,    name: "mental models",   color: Node.LAYER_COLORS[3] }
+	];
+
+	var buttons = [];
+	for(var i=0;i<options.length;i++){
+		(function(opt){
+			var btn = document.createElement("div");
+			btn.setAttribute("class", "layer_pick_btn");
+			btn.style.background = opt.color;
+			btn.innerHTML = opt.name;
+			btn.onclick = function(){
+				self.setValue(opt.value);
+				if(config.oninput) config.oninput(opt.value);
+				highlight();
+			};
+			pickerRow.appendChild(btn);
+			buttons.push({ btn: btn, value: opt.value });
+		})(options[i]);
+	}
+
+	var highlight = function(){
+		var current = self.getValue();
+		if(current===undefined) current = null;
+		for(var i=0;i<buttons.length;i++){
+			if(buttons[i].value === current){
+				buttons[i].btn.setAttribute("selected", "yes");
+			} else {
+				buttons[i].btn.removeAttribute("selected");
+			}
+		}
+	};
+
+	self.show = highlight;
+
+}
+
+function ComponentButton(config){
+
+	var self = this;
+	Component.apply(self);
+
 	self.dom = document.createElement("div");
 	var button = _createButton(config.label, function(){
 		config.onclick(self.page.target);
 	});
 	self.dom.appendChild(button);
 
-	// Unless it's a HEADER button!
 	if(config.header){
 		button.setAttribute("header","yes");
 	}
@@ -422,11 +447,9 @@ function ComponentButton(config){
 
 function ComponentHTML(config){
 
-	// Inherit
 	var self = this;
 	Component.apply(self);
 
-	// just a div
 	self.dom = document.createElement("div");
 	self.dom.innerHTML = config.html;
 
@@ -434,18 +457,15 @@ function ComponentHTML(config){
 
 function ComponentOutput(config){
 
-	// Inherit
 	var self = this;
 	Component.apply(self);
 
-	// DOM: just a readonly input that selects all when clicked
 	self.dom = _createInput("component_output");
 	self.dom.setAttribute("readonly", "true");
 	self.dom.onclick = function(){
 		self.dom.select();
 	};
 
-	// Output the string!
 	self.output = function(string){
 		self.dom.value = string;
 	};

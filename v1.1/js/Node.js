@@ -4,17 +4,34 @@ NODE!
 
 **********************************/
 
+// fpc brand-aligned palette
 Node.COLORS = {
-	0: "#EA3E3E", // red
-	1: "#EA9D51", // orange
-	2: "#FEEE43", // yellow
-	3: "#BFEE3F", // green
-	4: "#7FD4FF", // blue
-	5: "#A97FFF" // purple
+	0: "#0E4A55", // deep teal
+	1: "#3FA9A1", // mid teal
+	2: "#D75A2E", // rust
+	3: "#F1B19A", // peach
+	4: "#7FBFD9", // sky
+	5: "#C9A86A"  // sand
+};
+
+// Iceberg layer colors — matches the four layers, top → bottom
+// 0: events  1: patterns  2: structures  3: mental models
+Node.LAYER_COLORS = {
+	0: "#7FBFD9", // events — sky
+	1: "#F1B19A", // patterns — peach
+	2: "#D75A2E", // structures — rust
+	3: "#0E4A55"  // mental models — deep teal
+};
+Node.LAYER_NAMES = {
+	0: "events",
+	1: "patterns",
+	2: "structures",
+	3: "mental models"
 };
 
 Node.defaultValue = 0.5;
-Node.defaultHue = 0;
+Node.defaultHue = 1; // mid teal as default
+Node.defaultLayer = null;
 
 Node.DEFAULT_RADIUS = 60;
 
@@ -36,6 +53,7 @@ function Node(model, config){
 		init: Node.defaultValue, // initial value!
 		label: "?",
 		hue: Node.defaultHue,
+		layer: Node.defaultLayer, // iceberg layer: 0..3 or null
 		radius: Node.DEFAULT_RADIUS
 	});
 
@@ -196,6 +214,18 @@ function Node(model, config){
 			ctx.fill();
 		}
 		
+		// Layer accent ring — drawn outside the node circle when a layer is assigned
+		if(self.layer!==null && self.layer!==undefined){
+			var layerColor = Node.LAYER_COLORS[self.layer];
+			ctx.beginPath();
+			ctx.arc(0, 0, r+10, 0, Math.TAU, false);
+			ctx.lineWidth = 4;
+			ctx.strokeStyle = layerColor;
+			ctx.globalAlpha = 0.9;
+			ctx.stroke();
+			ctx.globalAlpha = 1;
+		}
+
 		// White-gray bubble with colored border
 		ctx.beginPath();
 		ctx.arc(0, 0, r-2, 0, Math.TAU, false);
@@ -252,6 +282,20 @@ function Node(model, config){
 			width = ctx.measureText(self.label).width;
 		}
 		ctx.fillText(self.label, 0, 0);
+
+		// In/out degree badge — small leverage signal next to each node.
+		// Only shown in EDIT mode so it doesn't clutter playback.
+		if(self.loopy.mode==Loopy.MODE_EDIT && self.loopy.showDegree){
+			var inD = self.model.getInDegree(self);
+			var outD = self.model.getOutDegree(self);
+			ctx.font = "normal 22px sans-serif";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillStyle = "#0E4A55"; // deep teal
+			ctx.globalAlpha = 0.85;
+			ctx.fillText("→"+inD+"  "+outD+"→", 0, r+30);
+			ctx.globalAlpha = 1;
+		}
 
 		// WOBBLE CONTROLS
 		var cl = 40;

@@ -1,62 +1,140 @@
 <!doctype html>
 <html>
 <head>
-    
-    <!-- META -->
-	<title>LOOPY (v1.1)</title>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-	<meta content="utf-8" http-equiv="encoding">
+
+	<title>fathom — see the system beneath the symptom</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="A tool by First Person Consulting for framing problems as systems and finding intervention points.">
 	<link rel="icon" type="image/png" href="favicon.png">
 
-	<!-- Schema.org markup for Google+ -->
-	<meta itemprop="name" content="LOOPY!">
-	<meta itemprop="description" content="a tool for thinking in systems">
-	<meta itemprop="image" content="http://ncase.me/loopy/social/thumbnail.png">
-
-	<!-- Twitter Card data: SMALL -->
-	<meta name="twitter:card" content="summary"/>
-	<meta name="twitter:site" content="@ncasenmare"/>
-	<meta name="twitter:title" content="LOOPY!"/>
-	<meta name="twitter:description" content="a tool for thinking in systems"/>
-	<meta name="twitter:creator" content="@ncasenmare">
-	<meta name="twitter:image" content="http://ncase.me/loopy/social/thumbnail_small.png"/>
-
-	<!-- Open Graph data -->
-	<meta property="og:title" content="LOOPY!">
-	<meta property="og:type" content="website">
-	<meta property="og:url" content="http://ncase.me/loopy/">
-	<meta property="og:image" content="http://ncase.me/loopy/social/thumbnail.png">
-	<meta property="og:description" content="a tool for thinking in systems">
-
-    <!-- Styles! -->
 	<link href="css/loopy.css" rel="stylesheet"/>
 	<link href="css/balloon.css" rel="stylesheet"/>
 
 </head>
 <body style="opacity:0">
 
-	<!-- Loopy & Ink -->
+	<!-- Top bar: brand + example loader + view toggles -->
+	<div id="topbar">
+		<div id="topbar_brand">
+			<span class="brand_word">fathom</span>
+			<span class="brand_tag">see the system beneath the symptom</span>
+		</div>
+		<div id="topbar_actions">
+			<div class="topbar_group" data-balloon="load a starter system" data-balloon-pos="down">
+				<span class="topbar_label">examples</span>
+				<button class="topbar_btn example_btn" data-example="environmental">environmental</button>
+				<button class="topbar_btn example_btn" data-example="health">health</button>
+				<button class="topbar_btn example_btn" data-example="social">social</button>
+				<button class="topbar_btn example_btn" data-example="blank">blank</button>
+			</div>
+			<div class="topbar_group">
+				<button class="topbar_btn topbar_toggle" id="toggle_iceberg" selected="yes">iceberg view</button>
+				<button class="topbar_btn topbar_toggle" id="toggle_degree" selected="yes">show connections</button>
+				<button class="topbar_btn topbar_primary" id="open_instructions">how to use</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Loopy canvas -->
 	<div id="canvasses"></div>
 
-	<!-- The Tools' UI -->
+	<!-- Drawing tools -->
 	<div id="toolbar"></div>
+
+	<!-- Play/edit controls -->
 	<div id="playbar"></div>
+
+	<!-- Right-hand sidebar -->
 	<div id="sidebar"></div>
 
-	<!-- MODAL -->
-	<div id="modal_container">
-		<div id="modal_bg"></div>
-		<div id="modal">
-			<div id="modal_close">[×] CLOSE</div>
-			<div id="modal_page"></div>
+	<!-- Slide-out instructions panel -->
+	<div id="instructions_panel">
+		<div id="instructions_header">
+			<div class="instructions_title">how to use fathom</div>
+			<div id="instructions_close" data-balloon="close" data-balloon-pos="left">&times;</div>
+		</div>
+		<div id="instructions_body">
+
+			<h3>1. why this tool</h3>
+			<p>
+				When a problem feels stuck, it's often because we're acting on the visible
+				symptoms instead of the deeper system producing them. <b>fathom</b> helps you
+				map a problem as a system and pick where to intervene.
+			</p>
+			<p>
+				It uses the <b>iceberg model</b> &mdash; four layers that sit on top of each
+				other, with leverage growing as you go deeper.
+			</p>
+
+			<h3>2. the four layers</h3>
+			<div class="layer_row" style="border-color: #7FBFD9">
+				<b>events</b><br>
+				the visible, day-to-day things people notice. <i>"a heatwave killed five people last week."</i>
+			</div>
+			<div class="layer_row" style="border-color: #F1B19A">
+				<b>patterns</b><br>
+				what's happened repeatedly across events. <i>"summer mortality has crept up every year for a decade."</i>
+			</div>
+			<div class="layer_row" style="border-color: #D75A2E">
+				<b>structures</b><br>
+				the policies, incentives and resource flows producing the patterns. <i>"zoning has reduced tree cover in low-income suburbs."</i>
+			</div>
+			<div class="layer_row" style="border-color: #0E4A55">
+				<b>mental models</b><br>
+				the beliefs and assumptions holding the structures in place. <i>"air conditioning is a luxury, not a right."</i>
+			</div>
+
+			<h3>3. drawing your system</h3>
+			<ol>
+				<li>Pick the <b>pencil</b>. Click anywhere to draw a node, then drag from one node to another to create an arrow.</li>
+				<li>Click an arrow to flip its <b>polarity</b> &mdash; <b>+</b> means more of A leads to more of B, <b>&minus;</b> means more of A leads to less of B.</li>
+				<li>Click a node to open the right-hand panel. Set its <b>iceberg layer</b> using the four-button picker.</li>
+				<li>The accent ring around the node shows its layer at a glance.</li>
+			</ol>
+
+			<h3>4. reading the connections</h3>
+			<p>
+				Each node shows two small numbers underneath:
+			</p>
+			<ul>
+				<li><b>&rarr; N in</b> &mdash; how many things flow into this node. High values usually mean a <i>symptom</i>: lots of stuff feeds it.</li>
+				<li><b>N out &rarr;</b> &mdash; how many things flow out. High values mean a <i>lever</i>: changing this node ripples widely through the system.</li>
+			</ul>
+			<p>
+				A node with high out-degree at a deep iceberg layer (structures, mental models) is usually
+				where you'll get the most leverage for the least effort. Use this to
+				narrow down where to act.
+			</p>
+
+			<h3>5. simulating</h3>
+			<p>
+				Hit <b>play</b> at the bottom. Hover over a node and click the up/down arrows
+				to push more or less of it into the system. Watch how the change propagates
+				through the arrows you drew. Use this to test your assumptions before committing
+				to an intervention.
+			</p>
+
+			<h3>6. start with an example</h3>
+			<p>
+				The <b>examples</b> in the top bar give you three pre-mapped systems
+				(environmental, health, social) so you can see the iceberg layers in
+				action. Load one, play with it, then build your own.
+			</p>
+
+			<div class="instructions_footer">
+				a tool by <a target="_blank" href="https://fpconsulting.com.au">first person consulting</a><br>
+				built on the simulation engine of <a target="_blank" href="https://ncase.me/loopy/">LOOPY</a> by Nicky Case.
+			</div>
+
 		</div>
 	</div>
 
 </body>
 </html>
 
-<!-- Scripts! -->
+<!-- Scripts -->
 
 <!-- Libraries -->
 <script src="js/helpers.js"></script>
@@ -64,27 +142,66 @@
 <script src="js/Mouse.js"></script>
 <script src="js/Key.js"></script>
 
-<!-- Core Simulation Code -->
-<script src="js/Loopy.js?v=5"></script>
-<script src="js/Model.js?v=3"></script>
-<script src="js/Node.js?v=3"></script>
+<!-- Examples (preset systems) -->
+<script src="js/Examples.js"></script>
+
+<!-- Core Simulation -->
+<script src="js/Loopy.js?v=6"></script>
+<script src="js/Model.js?v=4"></script>
+<script src="js/Node.js?v=4"></script>
 <script src="js/Edge.js?v=2"></script>
 <script src="js/Label.js"></script>
 
-<!-- Tools -->
+<!-- UI -->
 <script src="js/PageUI.js"></script>
-<script src="js/Sidebar.js?v=2"></script>
+<script src="js/Sidebar.js?v=3"></script>
 <script src="js/Toolbar.js"></script>
 <script src="js/PlayControls.js"></script>
-<script src="js/Modal.js?v=4"></script>
+<script src="js/Modal.js?v=5"></script>
 <script src="js/Ink.js"></script>
 <script src="js/Dragger.js"></script>
 <script src="js/Eraser.js"></script>
 <script src="js/Labeller.js"></script>
 
-<!-- Start it -->
+<!-- Wire up the top bar + instructions panel -->
 <script>
 window.onload = function(){
 	window.loopy = new Loopy();
+
+	// Example buttons
+	document.querySelectorAll(".example_btn").forEach(function(btn){
+		btn.addEventListener("click", function(){
+			var name = btn.getAttribute("data-example");
+			if(name === "blank"){
+				window.loopy.model.clear();
+				publish("model/changed");
+			} else {
+				window.loopy.loadExample(name);
+			}
+		});
+	});
+
+	// Iceberg toggle
+	var icebergBtn = document.getElementById("toggle_iceberg");
+	icebergBtn.addEventListener("click", function(){
+		var on = window.loopy.toggleIceberg();
+		icebergBtn.setAttribute("selected", on ? "yes" : "no");
+	});
+
+	// Connections (degree) toggle
+	var degreeBtn = document.getElementById("toggle_degree");
+	degreeBtn.addEventListener("click", function(){
+		var on = window.loopy.toggleDegree();
+		degreeBtn.setAttribute("selected", on ? "yes" : "no");
+	});
+
+	// Instructions panel open/close
+	var panel = document.getElementById("instructions_panel");
+	document.getElementById("open_instructions").addEventListener("click", function(){
+		panel.setAttribute("open", "yes");
+	});
+	document.getElementById("instructions_close").addEventListener("click", function(){
+		panel.removeAttribute("open");
+	});
 };
 </script>

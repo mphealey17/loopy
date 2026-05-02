@@ -36,6 +36,22 @@ function Loopy(config){
 	// Loopy: SPEED!
 	self.signalSpeed = 3;
 
+	// Iceberg backdrop + leverage degree readout — both ON by default.
+	// These can be toggled from the top bar.
+	self.showIceberg = true;
+	self.showDegree = true;
+
+	self.toggleIceberg = function(){
+		self.showIceberg = !self.showIceberg;
+		publish("model/changed");
+		return self.showIceberg;
+	};
+	self.toggleDegree = function(){
+		self.showDegree = !self.showDegree;
+		publish("model/changed");
+		return self.showDegree;
+	};
+
 	// Sidebar
 	self.sidebar = new Sidebar(self);
 	self.sidebar.showPage("Edit"); // start here
@@ -190,14 +206,21 @@ function Loopy(config){
 		return link;
 	};
 	
-	// "BLANK START" DATA:
-	var _blankData = "[[[1,403,223,1,%22something%22,4],[2,405,382,1,%22something%2520else%22,5]],[[2,1,94,-1,0],[1,2,89,1,0]],[[609,311,%22need%2520ideas%2520on%2520what%2520to%250Asimulate%253F%2520how%2520about%253A%250A%250A%25E3%2583%25BBtechnology%250A%25E3%2583%25BBenvironment%250A%25E3%2583%25BBeconomics%250A%25E3%2583%25BBbusiness%250A%25E3%2583%25BBpolitics%250A%25E3%2583%25BBculture%250A%25E3%2583%25BBpsychology%250A%250Aor%2520better%2520yet%252C%2520a%250A*combination*%2520of%250Athose%2520systems.%250Ahappy%2520modeling!%22]],2%5D";
-
 	self.loadFromURL = function(){
 		var data = _getParameterByName("data");
-		if(!data) data=decodeURIComponent(_blankData);
-		self.model.deserialize(data);
-	}; 
+		if(data) self.model.deserialize(data);
+		// otherwise — leave the canvas blank; the user picks an example or starts drawing.
+	};
+
+	self.loadExample = function(name){
+		if(!window.FATHOM_EXAMPLES) return;
+		var ex = window.FATHOM_EXAMPLES[name];
+		if(!ex) return;
+		self.model.loadFromObject(ex);
+		self.dirty = false;
+		self.model.center(true);
+		publish("model/changed");
+	};
 
 
 	///////////////////////////
