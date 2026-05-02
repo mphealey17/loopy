@@ -29,6 +29,61 @@ Node.LAYER_NAMES = {
 	3: "mental models"
 };
 
+// Per-layer shape — gets more structured / angular as you go deeper.
+// Unassigned nodes (and the implicit fallback) stay as circles.
+Node.LAYER_SHAPES = {
+	0: "circle",   // events — fluid
+	1: "rounded",  // patterns — recurring/blocky
+	2: "hexagon",  // structures — rigid framework
+	3: "diamond"   // mental models — cornerstone
+};
+
+// Trace a layer-shape path on the ctx with the given "radius" r.
+// Leaves a fresh path on the ctx — caller decides fill / stroke / clip.
+// All shapes are inscribed to roughly the same bounding circle (radius r)
+// so swap-out is visually balanced.
+Node._tracePath = function(ctx, shape, r){
+	ctx.beginPath();
+	if(shape === "rounded"){
+		var s = r * 2;
+		var corner = r * 0.32;
+		if(ctx.roundRect){
+			ctx.roundRect(-r, -r, s, s, corner);
+		} else {
+			ctx.moveTo(-r + corner, -r);
+			ctx.lineTo( r - corner, -r);
+			ctx.arc(   r - corner, -r + corner, corner, -Math.PI/2, 0);
+			ctx.lineTo( r,           r - corner);
+			ctx.arc(   r - corner,   r - corner, corner, 0, Math.PI/2);
+			ctx.lineTo(-r + corner,  r);
+			ctx.arc(  -r + corner,   r - corner, corner, Math.PI/2, Math.PI);
+			ctx.lineTo(-r,          -r + corner);
+			ctx.arc(  -r + corner, -r + corner, corner, Math.PI, 3*Math.PI/2);
+			ctx.closePath();
+		}
+	} else if(shape === "hexagon"){
+		// Flat-top hexagon — vertex distance r, top/bottom edge height r * sqrt(3)/2
+		var h = r * Math.sqrt(3) / 2;
+		ctx.moveTo( r,    0);
+		ctx.lineTo( r/2,  h);
+		ctx.lineTo(-r/2,  h);
+		ctx.lineTo(-r,    0);
+		ctx.lineTo(-r/2, -h);
+		ctx.lineTo( r/2, -h);
+		ctx.closePath();
+	} else if(shape === "diamond"){
+		// Square rotated 45°, vertex distance r
+		ctx.moveTo( 0, -r);
+		ctx.lineTo( r,  0);
+		ctx.lineTo( 0,  r);
+		ctx.lineTo(-r,  0);
+		ctx.closePath();
+	} else {
+		// circle — default
+		ctx.arc(0, 0, r, 0, Math.TAU, false);
+	}
+};
+
 Node.defaultValue = 0.5;
 Node.defaultHue = 1; // mid teal as default
 Node.defaultLayer = null;
@@ -206,40 +261,41 @@ function Node(model, config){
 		ctx.save();
 		ctx.translate(x,y+_offset);
 		
-		// DRAW HIGHLIGHT???
+		// Determine the per-layer shape (defaults to circle when unassigned)
+		var hasLayer = (self.layer!==null && self.layer!==undefined);
+		var shape = hasLayer ? Node.LAYER_SHAPES[self.layer] : "circle";
+
+		// DRAW HIGHLIGHT — follows the shape so selection still feels cohesive
 		if(self.loopy.sidebar.currentPage.target == self){
-			ctx.beginPath();
-			ctx.arc(0, 0, r+40, 0, Math.TAU, false);
+			Node._tracePath(ctx, shape, r+40);
 			ctx.fillStyle = HIGHLIGHT_COLOR;
 			ctx.fill();
 		}
-		
+
 		// Layer decoration — explicit visual cue when a layer is assigned.
 		// Stacks three signals so it's unmistakable:
-		//   1. soft outer halo (translucent)
-		//   2. crisp accent ring (bold)
+		//   1. soft outer halo (translucent, shape-following)
+		//   2. crisp accent ring (bold, shape-following)
 		//   3. labelled chip above the node with the layer name
-		if(self.layer!==null && self.layer!==undefined){
+		if(hasLayer){
 			var layerColor = Node.LAYER_COLORS[self.layer];
 			var layerName  = Node.LAYER_NAMES[self.layer];
 
 			// Soft outer halo
-			ctx.beginPath();
-			ctx.arc(0, 0, r+18, 0, Math.TAU, false);
+			Node._tracePath(ctx, shape, r+18);
 			ctx.lineWidth = 14;
 			ctx.strokeStyle = layerColor;
 			ctx.globalAlpha = 0.22;
 			ctx.stroke();
 
 			// Crisp accent ring
-			ctx.beginPath();
-			ctx.arc(0, 0, r+10, 0, Math.TAU, false);
+			Node._tracePath(ctx, shape, r+10);
 			ctx.lineWidth = 8;
 			ctx.strokeStyle = layerColor;
 			ctx.globalAlpha = 1;
 			ctx.stroke();
 
-			// Layer chip above the node
+			// Layer chip above the node (always a rounded rect — text must be readable)
 			ctx.font = "600 28px sans-serif";
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
@@ -250,7 +306,6 @@ function Node(model, config){
 			var chipY = -r - 38;
 			var chipR = 14;
 
-			// Chip background (filled rounded rect)
 			ctx.beginPath();
 			if(ctx.roundRect){
 				ctx.roundRect(-chipW/2, chipY - chipH/2, chipW, chipH, chipR);
@@ -260,19 +315,16 @@ function Node(model, config){
 			ctx.fillStyle = layerColor;
 			ctx.fill();
 
-			// Chip border (slight darken for readability on light layers)
 			ctx.lineWidth = 2;
 			ctx.strokeStyle = "rgba(14,74,85,0.25)";
 			ctx.stroke();
 
-			// Chip text — pick light or dark based on the layer color
 			ctx.fillStyle = (self.layer===0 || self.layer===1) ? "#0E4A55" : "#fff";
 			ctx.fillText(layerName, 0, chipY);
 		}
 
-		// White-gray bubble with colored border
-		ctx.beginPath();
-		ctx.arc(0, 0, r-2, 0, Math.TAU, false);
+		// White interior + colored border, in the layer's shape
+		Node._tracePath(ctx, shape, r-2);
 		ctx.fillStyle = "#fff";
 		ctx.fill();
 		ctx.lineWidth = 6;
@@ -305,13 +357,18 @@ function Node(model, config){
 			}
 		}
 
-		// Colored bubble
-		ctx.beginPath();
-		var _circleRadiusGoto = r*_value; // radius
+		// Colored value pulse — clipped to the layer shape so it can't overflow
+		// non-circular silhouettes (hexagon, diamond) at high values.
+		var _circleRadiusGoto = r*_value;
 		_circleRadius = _circleRadius*0.8 + _circleRadiusGoto*0.2;
+		ctx.save();
+		Node._tracePath(ctx, shape, r-2);
+		ctx.clip();
+		ctx.beginPath();
 		ctx.arc(0, 0, _circleRadius, 0, Math.TAU, false);
 		ctx.fillStyle = color;
 		ctx.fill();
+		ctx.restore();
 
 		// Text!
 		var fontsize = 40;
