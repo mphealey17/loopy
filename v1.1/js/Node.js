@@ -30,9 +30,10 @@ Node.LAYER_NAMES = {
 };
 
 // Per-layer shape — gets more structured / angular as you go deeper.
-// Unassigned nodes (and the implicit fallback) stay as circles.
+// Unassigned ("none") nodes stay as circles, so the visual identity of
+// "no layer chosen" is distinct from every assigned layer.
 Node.LAYER_SHAPES = {
-	0: "circle",   // events — fluid
+	0: "triangle", // events — surfacing, "tip of the iceberg" feel
 	1: "rounded",  // patterns — recurring/blocky
 	2: "hexagon",  // structures — rigid framework
 	3: "diamond"   // mental models — cornerstone
@@ -44,7 +45,14 @@ Node.LAYER_SHAPES = {
 // so swap-out is visually balanced.
 Node._tracePath = function(ctx, shape, r){
 	ctx.beginPath();
-	if(shape === "rounded"){
+	if(shape === "triangle"){
+		// Equilateral pointing-up triangle, vertices at distance r from origin
+		var s32 = Math.sqrt(3) / 2;
+		ctx.moveTo(    0, -r);
+		ctx.lineTo( r*s32,  r/2);
+		ctx.lineTo(-r*s32,  r/2);
+		ctx.closePath();
+	} else if(shape === "rounded"){
 		var s = r * 2;
 		var corner = r * 0.32;
 		if(ctx.roundRect){
