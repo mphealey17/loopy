@@ -36,9 +36,9 @@ function Loopy(config){
 	// Loopy: SPEED!
 	self.signalSpeed = 3;
 
-	// Iceberg backdrop + leverage degree readout — both ON by default.
-	// These can be toggled from the top bar.
-	self.showIceberg = true;
+	// Iceberg backdrop OFF by default; degree readout ON.
+	// Both can be toggled from the top bar.
+	self.showIceberg = false;
 	self.showDegree = true;
 
 	self.toggleIceberg = function(){
