@@ -230,10 +230,15 @@ div[big=yes] .play_button_label{
 	border: 2px solid transparent;
 	border-radius: 6px;
 	cursor: pointer;
-	background-size: 70% 70%;
-	background-repeat: no-repeat;
-	background-position: center;
-	transition: background-color 0.15s, border-color 0.15s;
+	color: var(--deep-teal);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.toolbar_button svg{
+	width: 28px;
+	height: 28px;
 }
 .toolbar_button:hover{
 	background-color: var(--pale-sky);
@@ -241,6 +246,7 @@ div[big=yes] .play_button_label{
 .toolbar_button[selected=yes]{
 	background-color: var(--sky);
 	border-color: var(--mid-teal);
+	color: var(--deep-teal);
 }
 
 /* ============= SIDEBAR ============= */
@@ -315,24 +321,24 @@ div[big=yes] .play_button_label{
 
 .shape_picker{
 	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
+	flex-direction: column;
+	gap: 4px;
 	margin-top: 4px;
 }
 .shape_pick_btn{
-	width: 44px;
-	height: 44px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: 12px;
+	padding: 6px 10px;
 	background: #fff;
 	border: 2px solid #d6e2e6;
 	border-radius: 6px;
 	cursor: pointer;
-	transition: border-color 0.12s, background 0.12s;
+	transition: border-color 0.12s, background 0.12s, transform 0.1s;
 }
 .shape_pick_btn:hover{
 	background: var(--pale-sky);
+	transform: translateX(2px);
 }
 .shape_pick_btn[selected=yes]{
 	border-color: var(--deep-teal);
@@ -343,9 +349,18 @@ div[big=yes] .play_button_label{
 	fill: var(--mid-teal);
 	stroke: var(--deep-teal);
 	stroke-width: 1.5;
+	flex-shrink: 0;
 }
 .shape_pick_btn[selected=yes] svg{
 	fill: var(--deep-teal);
+}
+.shape_pick_label{
+	font-size: 13px;
+	color: var(--ink);
+	font-weight: 500;
+}
+.shape_pick_btn[selected=yes] .shape_pick_label{
+	color: var(--deep-teal);
 }
 
 /* ============= DEGREE READOUT (sidebar) ============= */

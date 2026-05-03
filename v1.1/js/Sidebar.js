@@ -376,8 +376,9 @@ function ComponentSlider(config){
 
 function ComponentShapePicker(config){
 
-	// One button per Node.SHAPES option, each rendered as an inline-SVG preview
-	// so the user sees the silhouette they're picking — no labels needed.
+	// One row per shape: [SVG preview] [type label] — silhouette is the
+	// primary cue, the label gives a suggested category name without
+	// imposing iceberg framing on the canvas.
 	var self = this;
 	Component.apply(self);
 
@@ -385,9 +386,9 @@ function ComponentShapePicker(config){
 	var label = _createLabel(config.label);
 	self.dom.appendChild(label);
 
-	var pickerRow = document.createElement("div");
-	pickerRow.setAttribute("class", "shape_picker");
-	self.dom.appendChild(pickerRow);
+	var pickerCol = document.createElement("div");
+	pickerCol.setAttribute("class", "shape_picker");
+	self.dom.appendChild(pickerCol);
 
 	// Inline SVG paths for each shape, inscribed in a 32×32 box (centre 16,16, radius 11)
 	var SHAPE_SVGS = {
@@ -398,22 +399,32 @@ function ComponentShapePicker(config){
 		"diamond":  '<polygon points="16,5 27,16 16,27 5,16"/>'
 	};
 
+	// Suggested category name per shape (purely a label, no enforcement)
+	var SHAPE_NAMES = {
+		"circle":   "general",
+		"triangle": "events",
+		"rounded":  "patterns",
+		"hexagon":  "structures",
+		"diamond":  "mental models"
+	};
+
 	var buttons = [];
 	for(var i=0;i<Node.SHAPES.length;i++){
 		(function(shapeName){
 			var btn = document.createElement("div");
 			btn.setAttribute("class", "shape_pick_btn");
-			btn.setAttribute("title", shapeName);
+			btn.setAttribute("title", SHAPE_NAMES[shapeName]);
 			btn.innerHTML =
-				'<svg viewBox="0 0 32 32" width="32" height="32">' +
+				'<svg viewBox="0 0 32 32" width="28" height="28">' +
 				SHAPE_SVGS[shapeName] +
-				'</svg>';
+				'</svg>' +
+				'<span class="shape_pick_label">' + SHAPE_NAMES[shapeName] + '</span>';
 			btn.onclick = function(){
 				self.setValue(shapeName);
 				if(config.oninput) config.oninput(shapeName);
 				highlight();
 			};
-			pickerRow.appendChild(btn);
+			pickerCol.appendChild(btn);
 			buttons.push({ btn: btn, value: shapeName });
 		})(Node.SHAPES[i]);
 	}
