@@ -244,9 +244,6 @@ function Model(loopy){
 		}
 		ctx.setTransform(s, 0, 0, s, tx, ty);
 
-		// Iceberg backdrop bands (drawn first, behind everything)
-		if(loopy.showIceberg) self.drawIcebergBackdrop(ctx);
-
 		// Draw labels THEN edges THEN nodes
 		for(var i=0;i<self.labels.length;i++) self.labels[i].draw(ctx);
 		for(var i=0;i<self.edges.length;i++) self.edges[i].draw(ctx);
@@ -282,7 +279,9 @@ function Model(loopy){
 			// 3 - init value
 			// 4 - label
 			// 5 - hue
-			// 6 - layer (optional, -1 = unassigned)
+			// 6 - shape index (into Node.SHAPES)
+			var shapeIdx = Node.SHAPES.indexOf(node.shape || "circle");
+			if(shapeIdx<0) shapeIdx = 0;
 			nodes.push([
 				node.id,
 				Math.round(node.x),
@@ -290,7 +289,7 @@ function Model(loopy){
 				node.init,
 				encodeURIComponent(encodeURIComponent(node.label)),
 				node.hue,
-				(node.layer===null || node.layer===undefined) ? -1 : node.layer
+				shapeIdx
 			]);
 		}
 		data.push(nodes);
@@ -358,7 +357,8 @@ function Model(loopy){
 		// Nodes
 		for(var i=0;i<nodes.length;i++){
 			var node = nodes[i];
-			var layerVal = (node[6]===undefined || node[6]===-1) ? null : node[6];
+			var shapeIdx = node[6];
+			var shape = (typeof shapeIdx === "number" && Node.SHAPES[shapeIdx]) || "circle";
 			self.addNode({
 				id: node[0],
 				x: node[1],
@@ -366,7 +366,7 @@ function Model(loopy){
 				init: node[3],
 				label: decodeURIComponent(node[4]),
 				hue: node[5],
-				layer: layerVal
+				shape: shape
 			});
 		}
 
@@ -398,51 +398,6 @@ function Model(loopy){
 
 	};
 
-	// Draw iceberg layer bands across the full canvas in screen-space.
-	// The bands are pinned to the viewport (not model space) so they remain
-	// stable regardless of pan/zoom — they're a framing lens, not content.
-	self.drawIcebergBackdrop = function(ctx){
-		// Restore identity briefly so we can paint screen-space bands
-		ctx.save();
-		ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-		var W = self.canvas.width;
-		var H = self.canvas.height;
-		var bandH = H / 4;
-		var bands = [
-			{ name: "events",         color: "#E8F2F7" },
-			{ name: "patterns",       color: "#FBE8DC" },
-			{ name: "structures",     color: "#F4D2C0" },
-			{ name: "mental models",  color: "#C9DCDF" }
-		];
-		for(var i=0;i<4;i++){
-			ctx.fillStyle = bands[i].color;
-			ctx.globalAlpha = 0.55;
-			ctx.fillRect(0, i*bandH, W, bandH);
-		}
-		// dividers
-		ctx.globalAlpha = 0.35;
-		ctx.strokeStyle = "#0E4A55";
-		ctx.lineWidth = 2;
-		for(var i=1;i<4;i++){
-			ctx.beginPath();
-			ctx.moveTo(0, i*bandH);
-			ctx.lineTo(W, i*bandH);
-			ctx.stroke();
-		}
-		// labels (top-right of each band)
-		ctx.globalAlpha = 0.85;
-		ctx.fillStyle = "#0E4A55";
-		ctx.font = "600 28px sans-serif";
-		ctx.textAlign = "right";
-		ctx.textBaseline = "top";
-		for(var i=0;i<4;i++){
-			ctx.fillText(bands[i].name, W-30, i*bandH + 18);
-		}
-		ctx.globalAlpha = 1;
-		ctx.restore();
-	};
-
 	self.clear = function(){
 
 		// Just kill ALL nodes.
@@ -464,7 +419,7 @@ function Model(loopy){
 			self.addNode({
 				id: n.id, x: n.x, y: n.y,
 				init: n.init, label: n.label, hue: n.hue,
-				layer: (n.layer===undefined) ? null : n.layer
+				shape: n.shape || "circle"
 			});
 		}
 		for(var i=0;i<data.edges.length;i++){

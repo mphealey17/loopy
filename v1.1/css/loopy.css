@@ -311,35 +311,41 @@ div[big=yes] .play_button_label{
 	margin-top: 8px;
 }
 
-/* ============= LAYER PICKER (sidebar) ============= */
+/* ============= SHAPE PICKER (sidebar) ============= */
 
-.layer_picker{
+.shape_picker{
 	display: flex;
-	flex-direction: column;
+	flex-wrap: wrap;
 	gap: 6px;
 	margin-top: 4px;
 }
-.layer_pick_btn{
-	padding: 8px 10px;
+.shape_pick_btn{
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #fff;
+	border: 2px solid #d6e2e6;
 	border-radius: 6px;
-	font-size: 13px;
-	font-weight: 500;
-	color: #fff;
 	cursor: pointer;
-	border: 2px solid transparent;
-	text-align: left;
-	transition: transform 0.1s, border-color 0.1s;
+	transition: border-color 0.12s, background 0.12s;
 }
-.layer_pick_btn:hover{
-	transform: translateX(2px);
+.shape_pick_btn:hover{
+	background: var(--pale-sky);
 }
-.layer_pick_btn[selected=yes]{
+.shape_pick_btn[selected=yes]{
 	border-color: var(--deep-teal);
-	box-shadow: 0 1px 4px rgba(14,74,85,0.2);
+	background: var(--pale-sky);
+	box-shadow: 0 1px 4px rgba(14,74,85,0.18);
 }
-/* the "none" button is grey; force a darker text for legibility */
-.layer_pick_btn:first-child{
-	color: #444;
+.shape_pick_btn svg{
+	fill: var(--mid-teal);
+	stroke: var(--deep-teal);
+	stroke-width: 1.5;
+}
+.shape_pick_btn[selected=yes] svg{
+	fill: var(--deep-teal);
 }
 
 /* ============= DEGREE READOUT (sidebar) ============= */
@@ -541,17 +547,6 @@ div[big=yes] .play_button_label{
 	color: var(--mute);
 	font-style: italic;
 }
-.layer_row{
-	border-left: 4px solid #ccc;
-	padding: 8px 12px;
-	margin: 6px 0;
-	background: #f5f9fa;
-	font-size: 13px;
-	line-height: 1.45;
-}
-.layer_row b{ color: var(--deep-teal); }
-.layer_row i{ color: var(--mute); }
-
 .instructions_footer{
 	margin-top: 24px;
 	padding-top: 16px;

@@ -56,11 +56,11 @@ function Sidebar(loopy){
 			}
 		}));
 
-		// Iceberg layer picker — fathom's signature.
-		page.addComponent("layer", new ComponentLayerPicker({
-			label: "iceberg layer:",
+		// Shape picker — pick a silhouette to visually categorise the node.
+		page.addComponent("shape", new ComponentShapePicker({
+			label: "shape:",
 			oninput: function(value){
-				Node.defaultLayer = value;
+				Node.defaultShape = value;
 			}
 		}));
 
@@ -85,7 +85,7 @@ function Sidebar(loopy){
 				"<span class='degree_in'>&rarr; " + inD + " in</span>" +
 				"<span class='degree_out'>" + outD + " out &rarr;</span>" +
 				"</div>" +
-				"<div class='degree_hint'>high out-degree at deeper layers = stronger leverage</div>" +
+				"<div class='degree_hint'>high out-degree usually means high leverage</div>" +
 				"</div>";
 
 			// Focus on the name field IF IT'S "" or "?"
@@ -194,7 +194,8 @@ function Sidebar(loopy){
 			"&middot; <i>move</i> &mdash; reposition nodes<br>" +
 			"&middot; <i>erase</i> &mdash; remove things<br><br>" +
 			"<b>once you've drawn a node</b><br><br>" +
-			"click on it to open this panel and assign it to an iceberg layer.<br><br>" +
+			"click on it to open this panel. Pick a colour, a shape, and " +
+			"see how many connections flow into and out of it.<br><br>" +
 			"</div>" +
 
 			"<hr/>" +
@@ -373,9 +374,10 @@ function ComponentSlider(config){
 
 }
 
-function ComponentLayerPicker(config){
+function ComponentShapePicker(config){
 
-	// 4 buttons + an "unassigned" option, mapping to layer 0..3 / null
+	// One button per Node.SHAPES option, each rendered as an inline-SVG preview
+	// so the user sees the silhouette they're picking — no labels needed.
 	var self = this;
 	Component.apply(self);
 
@@ -384,37 +386,40 @@ function ComponentLayerPicker(config){
 	self.dom.appendChild(label);
 
 	var pickerRow = document.createElement("div");
-	pickerRow.setAttribute("class", "layer_picker");
+	pickerRow.setAttribute("class", "shape_picker");
 	self.dom.appendChild(pickerRow);
 
-	var options = [
-		{ value: null, name: "none",            color: "#cccccc" },
-		{ value: 0,    name: "events",          color: Node.LAYER_COLORS[0] },
-		{ value: 1,    name: "patterns",        color: Node.LAYER_COLORS[1] },
-		{ value: 2,    name: "structures",      color: Node.LAYER_COLORS[2] },
-		{ value: 3,    name: "mental models",   color: Node.LAYER_COLORS[3] }
-	];
+	// Inline SVG paths for each shape, inscribed in a 32×32 box (centre 16,16, radius 11)
+	var SHAPE_SVGS = {
+		"circle":   '<circle cx="16" cy="16" r="11"/>',
+		"triangle": '<polygon points="16,5 25.5,21.5 6.5,21.5"/>',
+		"rounded":  '<rect x="5" y="5" width="22" height="22" rx="6"/>',
+		"hexagon":  '<polygon points="27,16 21.5,25.5 10.5,25.5 5,16 10.5,6.5 21.5,6.5"/>',
+		"diamond":  '<polygon points="16,5 27,16 16,27 5,16"/>'
+	};
 
 	var buttons = [];
-	for(var i=0;i<options.length;i++){
-		(function(opt){
+	for(var i=0;i<Node.SHAPES.length;i++){
+		(function(shapeName){
 			var btn = document.createElement("div");
-			btn.setAttribute("class", "layer_pick_btn");
-			btn.style.background = opt.color;
-			btn.innerHTML = opt.name;
+			btn.setAttribute("class", "shape_pick_btn");
+			btn.setAttribute("title", shapeName);
+			btn.innerHTML =
+				'<svg viewBox="0 0 32 32" width="32" height="32">' +
+				SHAPE_SVGS[shapeName] +
+				'</svg>';
 			btn.onclick = function(){
-				self.setValue(opt.value);
-				if(config.oninput) config.oninput(opt.value);
+				self.setValue(shapeName);
+				if(config.oninput) config.oninput(shapeName);
 				highlight();
 			};
 			pickerRow.appendChild(btn);
-			buttons.push({ btn: btn, value: opt.value });
-		})(options[i]);
+			buttons.push({ btn: btn, value: shapeName });
+		})(Node.SHAPES[i]);
 	}
 
 	var highlight = function(){
-		var current = self.getValue();
-		if(current===undefined) current = null;
+		var current = self.getValue() || "circle";
 		for(var i=0;i<buttons.length;i++){
 			if(buttons[i].value === current){
 				buttons[i].btn.setAttribute("selected", "yes");

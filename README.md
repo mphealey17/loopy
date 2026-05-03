@@ -2,14 +2,13 @@
 
 > see the system beneath the symptom
 
-A tool by [First Person Consulting](https://fpconsulting.com.au) for framing
-problems as systems and finding intervention points.
+A tool by [First Person Consulting](https://fpconsulting.com.au) for mapping
+problems as systems and exploring where to intervene.
 
 `fathom` is built for workshops, strategy sessions and capability-building.
-Use it to map a problem through the **iceberg model** — events at the surface,
-patterns underneath, structures below those, and mental models at the bottom —
-then look at how nodes connect to spot where the highest-leverage intervention
-points sit.
+Sketch a problem as a network of nodes and arrows, categorise the nodes by
+shape and colour however suits your context, and use the in/out connection
+counts to spot leverage points.
 
 ## Using fathom
 
@@ -22,12 +21,11 @@ landing page, an internal LMS, a client deliverable). Drop it into a host page:
 
 Inside the tool you can:
 
-- **Load a starter system** — pick from environmental, health or social systems pre-mapped onto the iceberg layers.
+- **Load a starter system** — pick from environmental, health or social systems.
 - **Draw your own** — pencil in nodes, drag arrows between them, click an arrow to flip its polarity (`+` or `−`).
-- **Tag each node with an iceberg layer** — the right-hand panel has a four-button picker.
-- **Read leverage at a glance** — every node shows in/out degree counts. High out-degree at deeper layers usually means high leverage.
+- **Pick a shape and colour for each node** — five shapes (circle, triangle, rounded square, hexagon, diamond) and six colours, free-form so you can apply your own conventions.
+- **Read leverage at a glance** — every node shows in/out degree counts. High out-degree usually means a leverage point.
 - **Simulate** — hit play and push values up or down on a node to watch the system respond.
-- **Use the iceberg view** — toggle the layered backdrop on or off in the top bar.
 
 ## Layout
 
@@ -37,10 +35,10 @@ v1.1/
 ├── css/loopy.css       # fpc-brand styling
 ├── js/
 │   ├── Loopy.js        # main app
-│   ├── Model.js        # system model + iceberg backdrop + connectivity helpers
-│   ├── Node.js         # node with iceberg layer + degree badge
+│   ├── Model.js        # system model + connectivity helpers
+│   ├── Node.js         # node with shape + degree badge
 │   ├── Edge.js         # arrow with polarity
-│   ├── Sidebar.js      # right-hand panel + layer picker
+│   ├── Sidebar.js      # right-hand panel + shape picker
 │   ├── Toolbar.js      # left-hand drawing tools
 │   ├── Examples.js     # the three preset systems
 │   └── ...
@@ -53,7 +51,7 @@ v1.1/
 [**LOOPY**](https://ncase.me/loopy/) by Nicky Case (released to the public
 domain under [CC0](http://creativecommons.org/publicdomain/zero/1.0/)).
 
-The iceberg framing, fpc-brand styling, in/out degree analysis,
+The fpc-brand styling, shape categorisation, in/out degree analysis,
 preset systems and instructions panel are added on top.
 
 This repo, like LOOPY, is public domain.

@@ -36,16 +36,8 @@ function Loopy(config){
 	// Loopy: SPEED!
 	self.signalSpeed = 3;
 
-	// Iceberg backdrop OFF by default; degree readout ON.
-	// Both can be toggled from the top bar.
-	self.showIceberg = false;
+	// Connection-degree readout (in/out arrows under each node) — ON by default.
 	self.showDegree = true;
-
-	self.toggleIceberg = function(){
-		self.showIceberg = !self.showIceberg;
-		publish("model/changed");
-		return self.showIceberg;
-	};
 	self.toggleDegree = function(){
 		self.showDegree = !self.showDegree;
 		publish("model/changed");

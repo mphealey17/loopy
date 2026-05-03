@@ -14,32 +14,10 @@ Node.COLORS = {
 	5: "#C9A86A"  // sand
 };
 
-// Iceberg layer colors — matches the four layers, top → bottom
-// 0: events  1: patterns  2: structures  3: mental models
-Node.LAYER_COLORS = {
-	0: "#7FBFD9", // events — sky
-	1: "#F1B19A", // patterns — peach
-	2: "#D75A2E", // structures — rust
-	3: "#0E4A55"  // mental models — deep teal
-};
-Node.LAYER_NAMES = {
-	0: "events",
-	1: "patterns",
-	2: "structures",
-	3: "mental models"
-};
+// Available node shapes — purely visual, user assigns whatever meaning suits.
+Node.SHAPES = ["circle", "triangle", "rounded", "hexagon", "diamond"];
 
-// Per-layer shape — gets more structured / angular as you go deeper.
-// Unassigned ("none") nodes stay as circles, so the visual identity of
-// "no layer chosen" is distinct from every assigned layer.
-Node.LAYER_SHAPES = {
-	0: "triangle", // events — surfacing, "tip of the iceberg" feel
-	1: "rounded",  // patterns — recurring/blocky
-	2: "hexagon",  // structures — rigid framework
-	3: "diamond"   // mental models — cornerstone
-};
-
-// Trace a layer-shape path on the ctx with the given "radius" r.
+// Trace a shape path on the ctx with the given "radius" r.
 // Leaves a fresh path on the ctx — caller decides fill / stroke / clip.
 // All shapes are inscribed to roughly the same bounding circle (radius r)
 // so swap-out is visually balanced.
@@ -94,7 +72,7 @@ Node._tracePath = function(ctx, shape, r){
 
 Node.defaultValue = 0.5;
 Node.defaultHue = 1; // mid teal as default
-Node.defaultLayer = null;
+Node.defaultShape = "circle";
 
 Node.DEFAULT_RADIUS = 60;
 
@@ -116,7 +94,7 @@ function Node(model, config){
 		init: Node.defaultValue, // initial value!
 		label: "?",
 		hue: Node.defaultHue,
-		layer: Node.defaultLayer, // iceberg layer: 0..3 or null
+		shape: Node.defaultShape, // one of Node.SHAPES
 		radius: Node.DEFAULT_RADIUS
 	});
 
@@ -269,9 +247,7 @@ function Node(model, config){
 		ctx.save();
 		ctx.translate(x,y+_offset);
 		
-		// Determine the per-layer shape (defaults to circle when unassigned)
-		var hasLayer = (self.layer!==null && self.layer!==undefined);
-		var shape = hasLayer ? Node.LAYER_SHAPES[self.layer] : "circle";
+		var shape = self.shape || "circle";
 
 		// DRAW HIGHLIGHT — follows the shape so selection still feels cohesive
 		if(self.loopy.sidebar.currentPage.target == self){
@@ -280,58 +256,7 @@ function Node(model, config){
 			ctx.fill();
 		}
 
-		// Layer decoration — explicit visual cue when a layer is assigned.
-		// Stacks three signals so it's unmistakable:
-		//   1. soft outer halo (translucent, shape-following)
-		//   2. crisp accent ring (bold, shape-following)
-		//   3. labelled chip above the node with the layer name
-		if(hasLayer){
-			var layerColor = Node.LAYER_COLORS[self.layer];
-			var layerName  = Node.LAYER_NAMES[self.layer];
-
-			// Soft outer halo
-			Node._tracePath(ctx, shape, r+18);
-			ctx.lineWidth = 14;
-			ctx.strokeStyle = layerColor;
-			ctx.globalAlpha = 0.22;
-			ctx.stroke();
-
-			// Crisp accent ring
-			Node._tracePath(ctx, shape, r+10);
-			ctx.lineWidth = 8;
-			ctx.strokeStyle = layerColor;
-			ctx.globalAlpha = 1;
-			ctx.stroke();
-
-			// Layer chip above the node (always a rounded rect — text must be readable)
-			ctx.font = "600 28px sans-serif";
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
-			var nameWidth = ctx.measureText(layerName).width;
-			var chipPadX = 22;
-			var chipW = nameWidth + chipPadX*2;
-			var chipH = 40;
-			var chipY = -r - 38;
-			var chipR = 14;
-
-			ctx.beginPath();
-			if(ctx.roundRect){
-				ctx.roundRect(-chipW/2, chipY - chipH/2, chipW, chipH, chipR);
-			} else {
-				ctx.rect(-chipW/2, chipY - chipH/2, chipW, chipH);
-			}
-			ctx.fillStyle = layerColor;
-			ctx.fill();
-
-			ctx.lineWidth = 2;
-			ctx.strokeStyle = "rgba(14,74,85,0.25)";
-			ctx.stroke();
-
-			ctx.fillStyle = (self.layer===0 || self.layer===1) ? "#0E4A55" : "#fff";
-			ctx.fillText(layerName, 0, chipY);
-		}
-
-		// White interior + colored border, in the layer's shape
+		// White interior + coloured border, in the chosen shape
 		Node._tracePath(ctx, shape, r-2);
 		ctx.fillStyle = "#fff";
 		ctx.fill();
@@ -365,7 +290,7 @@ function Node(model, config){
 			}
 		}
 
-		// Colored value pulse — clipped to the layer shape so it can't overflow
+		// Coloured value pulse — clipped to the node shape so it can't overflow
 		// non-circular silhouettes (hexagon, diamond) at high values.
 		var _circleRadiusGoto = r*_value;
 		_circleRadius = _circleRadius*0.8 + _circleRadiusGoto*0.2;
